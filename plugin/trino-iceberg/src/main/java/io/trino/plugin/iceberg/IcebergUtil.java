@@ -553,8 +553,8 @@ public final class IcebergUtil
     public static Schema schemaFromMetadata(List<ColumnMetadata> columns)
     {
         List<NestedField> icebergColumns = new ArrayList<>();
-        int visibleColumnNumber = (int) columns.stream().filter(column -> !column.isHidden()).count();
-        AtomicInteger nextFieldId = new AtomicInteger(visibleColumnNumber + 1);
+        int visibleColumnCount = (int) columns.stream().filter(column -> !column.isHidden()).count();
+        AtomicInteger nextFieldId = new AtomicInteger(visibleColumnCount + 1);
         for (ColumnMetadata column : columns) {
             if (!column.isHidden()) {
                 int index = icebergColumns.size() + 1;

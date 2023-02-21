@@ -201,7 +201,7 @@ public final class TypeConverter
             Optional<ColumnIdentity> childColumnIdentity = columnIdentity.map(column -> column.getChildren().get(fieldIndex));
             int id = childColumnIdentity
                     .map(ColumnIdentity::getId)
-                    .orElseGet(() -> nextFieldId.orElseThrow(() -> new IllegalArgumentException("Either a column identity or nextFieldId is expected")).getAndIncrement());
+                    .orElseGet(() -> nextFieldId.get().getAndIncrement());
 
             RowType.Field field = type.getFields().get(fieldIndex);
             String name = field.getName().orElseThrow(() ->
@@ -217,7 +217,7 @@ public final class TypeConverter
         Optional<ColumnIdentity> childColumnIdentity = columnIdentity.map(identity -> getOnlyElement(identity.getChildren()));
         int id = childColumnIdentity
                 .map(ColumnIdentity::getId)
-                .orElseGet(() -> nextFieldId.orElseThrow(() -> new IllegalArgumentException("Either a column identity or nextFieldId is expected")).getAndIncrement());
+                .orElseGet(() -> nextFieldId.get().getAndIncrement());
         return Types.ListType.ofOptional(id, toIcebergTypeInternal(type.getElementType(), childColumnIdentity, nextFieldId));
     }
 
@@ -228,11 +228,15 @@ public final class TypeConverter
         Optional<ColumnIdentity> valueColumnIdentity = columnIdentity.map(column -> column.getChildren().get(1));
         int keyId = keyColumnIdentity
                 .map(ColumnIdentity::getId)
-                .orElseGet(() -> nextFieldId.orElseThrow(() -> new IllegalArgumentException("Either a column identity or nextFieldId is expected")).getAndIncrement());
+                .orElseGet(() -> nextFieldId.get().getAndIncrement());
         int valueId = valueColumnIdentity
                 .map(ColumnIdentity::getId)
-                .orElseGet(() -> nextFieldId.orElseThrow(() -> new IllegalArgumentException("Either a column identity or nextFieldId is expected")).getAndIncrement());
-        return Types.MapType.ofOptional(keyId, valueId, toIcebergTypeInternal(type.getKeyType(), keyColumnIdentity, nextFieldId), toIcebergTypeInternal(type.getValueType(), valueColumnIdentity, nextFieldId));
+                .orElseGet(() -> nextFieldId.get().getAndIncrement());
+        return Types.MapType.ofOptional(
+                keyId,
+                valueId,
+                toIcebergTypeInternal(type.getKeyType(), keyColumnIdentity, nextFieldId),
+                toIcebergTypeInternal(type.getValueType(), valueColumnIdentity, nextFieldId));
     }
 
     private static void checkExactlyOne(Optional<ColumnIdentity> columnIdentity, Optional<AtomicInteger> nextFieldId)
